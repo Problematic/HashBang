@@ -78,14 +78,21 @@ class HashBang
             $long = ltrim(self::$switches[$i]['long'], '-');
 
             $opts = getopt($short, array($long));
-            array_walk($opts, function($value, $key) use(&$argv) {
-                $prefix = 1 === strlen($key) ? '-' : '--';
-                if (false !== $index = array_search($prefix . $key, $argv)) {
+            $value = null;
+            foreach ($opts as $opt => $value) {
+                $short = rtrim($short, ':');
+                $long = rtrim($long, ':');
+                $value = $value ?: true;
+                $prefix = 1 === strlen($opt) ? '-' : '--';
+                if (false !== $index = array_search($prefix.$opt, $argv)) {
                     unset($argv[$index]);
+                    if (true !== $value) {
+                        unset($argv[++$index]);
+                    }
                 }
-            });
+            }
 
-            self::$options[$long] = self::$options[$short] = true;
+            self::$options[$long] = self::$options[$short] = $value;
         }
         unset(self::$options['']); // artifact from switches without a long version
 
