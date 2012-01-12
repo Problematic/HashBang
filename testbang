@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+require 'hashbang.php';
+
+$app = new HashBang(function($firstname, $lastname, $options) {
+    $output = "Hello, {$firstname}";
+    if ($lastname) {
+        $output .= " {$lastname}";
+    }
+    $output .= "!\n";
+
+    if ($options['yell']) {
+        $output = strtoupper($output);
+    }
+
+    echo $output;
+});
+
+HashBang::addArg('firstname');
+HashBang::addArg('lastname', false);
+
+HashBang::addSwitch('-y', '--yell');
+
+$app->go();
