@@ -21,9 +21,8 @@ class HashBang
     public function go()
     {
         try {
-            $argv = $this->initialize();
-            $options = array(); // todo: implement option switches
-            $this->invoke($this->main, $argv);
+            $this->initialize();
+            $this->invoke($this->main);
         } catch (\HashBangException $e) {
             $this->handleException($e);
         }
