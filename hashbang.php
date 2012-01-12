@@ -5,13 +5,13 @@ class HashBang
 
     protected $main;
 
-    protected static $switches = array();
-    protected static $args = array();
-    protected static $requiredArgs = array();
-    protected static $optionalArgs = array();
+    protected $switches = array();
+    protected $args = array();
+    protected $requiredArgs = array();
+    protected $optionalArgs = array();
 
-    protected static $argv = array();
-    protected static $options = array();
+    protected $argv = array();
+    protected $options = array();
 
     public function __construct(\Closure $main)
     {
@@ -28,32 +28,32 @@ class HashBang
         }
     }
 
-    public static function addArg($arg, $required = true)
+    public function addArg($arg, $required = true)
     {
-        self::$args[$arg] = null;
+        $this->args[$arg] = null;
         if ($required) {
-            self::$requiredArgs[] = $arg;
+            $this->requiredArgs[] = $arg;
         } else {
-            self::$optionalArgs[] = $arg;
+            $this->optionalArgs[] = $arg;
         }
     }
 
-    public static function addSwitch($short, $long = null)
+    public function addSwitch($short, $long = null)
     {
         $switch = array();
         $switch['short'] = $short;
         $switch['long'] = $long;
 
-        self::$switches[] = $switch;
+        $this->switches[] = $switch;
     }
 
     protected function invoke(\Closure $main)
     {
         $refl = new \ReflectionFunction($main);
 
-        $args = self::$args;
-        $args['argv'] = self::$argv;
-        $args['options'] = self::$options;
+        $args = $this->args;
+        $args['argv'] = $this->argv;
+        $args['options'] = $this->options;
         $argList = array();
 
         $params = $refl->getParameters();
@@ -72,10 +72,10 @@ class HashBang
         $argv = $GLOBALS['argv'];
         array_shift($argv);
 
-        $count = count(self::$switches);
+        $count = count($this->switches);
         for($i = 0; $i < $count; $i++) {
-            $short = ltrim(self::$switches[$i]['short'], '-');
-            $long = ltrim(self::$switches[$i]['long'], '-');
+            $short = ltrim($this->switches[$i]['short'], '-');
+            $long = ltrim($this->switches[$i]['long'], '-');
 
             $opts = getopt($short, array($long));
             $value = null;
@@ -92,25 +92,25 @@ class HashBang
                 }
             }
 
-            self::$options[$long] = self::$options[$short] = $value;
+            $this->options[$long] = $this->options[$short] = $value;
         }
-        unset(self::$options['']); // artifact from switches without a long version
+        unset($this->options['']); // artifact from switches without a long version
 
-        while (self::$requiredArgs) {
-            $required = array_shift(self::$requiredArgs);
+        while ($this->requiredArgs) {
+            $required = array_shift($this->requiredArgs);
             $val = array_shift($argv);
             if (null === $val) {
                 throw new \HashBangException(sprintf("'%s' is a required argument", $required));
             }
-            self::$args[$required] = $val;
+            $this->args[$required] = $val;
         }
 
-        while (self::$optionalArgs) {
-            $optional = array_shift(self::$optionalArgs);
-            self::$args[$optional] = array_shift($argv);
+        while ($this->optionalArgs) {
+            $optional = array_shift($this->optionalArgs);
+            $this->args[$optional] = array_shift($argv);
         }
 
-        self::$argv = $argv;
+        $this->argv = $argv;
     }
 
     protected function handleException(hashbangException $e)

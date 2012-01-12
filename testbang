@@ -17,9 +17,9 @@ $app = new HashBang(function($firstname, $lastname, $options) {
     echo $output;
 });
 
-HashBang::addArg('firstname');
-HashBang::addArg('lastname', false);
+$app->addArg('firstname');
+$app->addArg('lastname', false);
 
-HashBang::addSwitch('-y', '--yell');
+$app->addSwitch('-y', '--yell');
 
 $app->go();
